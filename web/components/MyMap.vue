@@ -24,8 +24,8 @@ export default Vue.extend({
         accessToken: process.env.MAPBOX_ACCESSTOKEN,
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v8',
-        center: [143.767125, 38.681236],
-        zoom: 4,
+        center: [139.70806478495345, 35.70089550191666],
+        zoom: 14,
       },
     }
   },
@@ -44,6 +44,75 @@ export default Vue.extend({
         defaultLanguage: 'ja',
       })
     )
+
+    this.map.on('load', () => {
+      this.map.addLayer({
+        id: 'lightPoints',
+        type: 'symbol',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [139.70839782453416, 35.70351976850313],
+                },
+                properties: {
+                  name: '新宿区XX-11',
+                  icon: 'museum',
+                },
+              },
+              {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: [139.70911949336235, 35.708505185551644],
+                },
+                properties: {
+                  name: '新宿区XX-22',
+                  icon: 'museum',
+                },
+              },
+            ],
+          },
+        },
+        layout: {
+          'icon-image': ['concat', ['get', 'icon'], '-15'],
+          'text-field': ['get', 'name'],
+          // 'text-font': ['メイリオ', 'sans-serif'],
+          'text-offset': [0, 0.6],
+          'text-anchor': 'top',
+        },
+      })
+
+      this.$accessor.lightList.add({
+        title: '新宿区XX-11',
+        longitude: 139.70839782453416,
+        latitude: 35.70351976850313,
+      })
+      this.$accessor.lightList.add({
+        title: '新宿区XX-22',
+        longitude: 139.70911949336235,
+        latitude: 35.708505185551644,
+      })
+    })
+
+    this.map.on('click', (e) => {
+      const features = this.map.queryRenderedFeatures(e.point, {
+        layers: ['lightPoints'],
+      })
+      if (!features.length) {
+        return
+      }
+      const feature = features[0]
+      const lightProperty = feature.properties
+      if (lightProperty !== null) {
+        this.$accessor.lightList.select(lightProperty.name)
+      }
+    })
   },
 })
 </script>
@@ -56,6 +125,6 @@ export default Vue.extend({
 <style scoped>
 #map {
   width: 100%;
-  height: 100vh;
+  height: 80vh;
 }
 </style>

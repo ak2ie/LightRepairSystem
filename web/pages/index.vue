@@ -4,7 +4,7 @@
       <v-list two-line>
         <v-list-item-group v-model="selectedItemIndex">
           <template v-for="(item, index) in list">
-            <v-list-item :key="index" @click="selectItem">
+            <v-list-item :key="index">
               <v-list-item-title>{{ item.title }}</v-list-item-title>
               <v-list-item-subtitle>20201/07/01 20:09</v-list-item-subtitle>
             </v-list-item>
@@ -49,6 +49,9 @@ export default Vue.extend({
       // selectedItemIndex: -1,
     }
   },
+  async fetch() {
+    await this.$accessor.lightList.loadAllData()
+  },
   computed: {
     selectedLight() {
       return this.$accessor.lightList.selectedLight || { title: '' }
@@ -80,14 +83,14 @@ export default Vue.extend({
       set(value: number) {
         const title = this.$accessor.lightList.lightList[value].title
         this.$accessor.lightList.select(title)
+        this.$accessor.lightList.setFlyTo(
+          this.$accessor.lightList.lightList[value]
+        )
       },
     },
   },
-  methods: {
-    selectItem() {
-      console.log('OK')
-    },
-  },
+  watch: {},
+  methods: {},
 })
 </script>
 

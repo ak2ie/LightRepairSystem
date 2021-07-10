@@ -29,6 +29,25 @@ export default Vue.extend({
       },
     }
   },
+  computed: {
+    lightList() {
+      const FeatureType: 'Feature' = 'Feature'
+      const PointType: 'Point' = 'Point'
+      return this.$accessor.lightList.lightList.map((light) => {
+        return {
+          type: FeatureType,
+          geometry: {
+            type: PointType,
+            coordinates: [light.longitude, light.latitude],
+          },
+          properties: {
+            name: light.title,
+            icon: 'museum',
+          },
+        }
+      })
+    },
+  },
   mounted() {
     this.map = new mapboxgl.Map(this.option)
     // 検索バー
@@ -53,30 +72,7 @@ export default Vue.extend({
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [139.70839782453416, 35.70351976850313],
-                },
-                properties: {
-                  name: '新宿区XX-11',
-                  icon: 'museum',
-                },
-              },
-              {
-                type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [139.70911949336235, 35.708505185551644],
-                },
-                properties: {
-                  name: '新宿区XX-22',
-                  icon: 'museum',
-                },
-              },
-            ],
+            features: this.lightList,
           },
         },
         layout: {
@@ -88,16 +84,16 @@ export default Vue.extend({
         },
       })
 
-      this.$accessor.lightList.add({
-        title: '新宿区XX-11',
-        longitude: 139.70839782453416,
-        latitude: 35.70351976850313,
-      })
-      this.$accessor.lightList.add({
-        title: '新宿区XX-22',
-        longitude: 139.70911949336235,
-        latitude: 35.708505185551644,
-      })
+      // 地図をリストで選択された街灯に移動させる
+      this.$store.watch(
+        () => this.$accessor.lightList.flyTo,
+        (light) => {
+          this.map.flyTo({
+            center: [light.longitude, light.latitude],
+            zoom: 14,
+          })
+        }
+      )
     })
 
     this.map.on('click', (e) => {
